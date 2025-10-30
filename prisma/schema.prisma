@@ -75,7 +75,7 @@ model User {
   matricula         String       @id // Chave primária baseada em RF1 e RF3.1 
   nome              String // Baseado no protótipo (p. 19) e RF04.2 [cite: 100, 160]
   email             String       @unique // RF3.1 
-  senhaHash         String // "senha" de RF1 e RF3 
+  senha             String // "senha" de RF1 e RF3 
   role              Role         @default(USER) // RF1.5 
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
