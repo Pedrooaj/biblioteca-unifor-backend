@@ -1,0 +1,209 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+
+
+/// Enum para os papéis de usuário (RF1.5)
+enum Role {
+  USER
+  ADMIN
+}
+
+/// Enum para os tipos de obra (RF07, RF20.1)
+enum BookType {
+  FISICO
+  DIGITAL
+}
+
+/// Enum para o status dos exemplares (RF22.2-RF22.5)
+enum CopyStatus {
+  DISPONIVEL
+  ALUGADO
+  RESERVADO
+  INDISPONIVEL // Manutenção, etc.
+}
+
+/// Enum para a condição física do exemplar (RF23.3)
+enum BookCondition {
+  MUITO_BOA
+  BOA
+  CONSERVADO
+  RUIM
+  MUITO_RUIM
+}
+
+/// Enum para o status do empréstimo (RF08.1)
+enum LoanStatus {
+  ATIVO
+  DEVOLVIDO
+}
+
+/// Enum para o status da reserva (RF23.10, RF23.12)
+enum ReservationStatus {
+  ATIVA
+  CANCELADA
+  EXPIRADA
+  CONCLUIDA // Quando o empréstimo é efetuado
+}
+
+/// Enum para permissões em Pastas (RF10.6, RF10.11)
+enum FolderRole {
+  PROPRIETARIO
+  EDITOR
+  LEITOR
+}
+
+// MODELOS
+
+/// Modelo para Usuários e Administradores (Atores)
+/// Baseado nos requisitos RF1, RF3, RF10, RF14
+model User {
+  matricula         String       @id // Chave primária baseada em RF1 e RF3.1 
+  nome              String // Baseado no protótipo (p. 19) e RF04.2 [cite: 100, 160]
+  email             String       @unique // RF3.1 
+  senhaHash         String // "senha" de RF1 e RF3 
+  role              Role         @default(USER) // RF1.5 
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  // Relacionamentos
+  loans             Loan[]
+  reservations      Reservation[]
+  folderMemberships FolderUser[] // Pastas onde o usuário é membro
+  cartItems         CartItem[] // Itens na cesta do usuário
+  chatThread        ChatMessage[] @relation("ChatThread") // Mensagens do chat do usuário
+}
+
+/// Modelo para a Obra (Livro)
+/// Baseado nos requisitos RF07 e RF20.1
+model Book {
+  id          String     @id @default(cuid())
+  isbn        String     @unique // RF20.1 [cite: 110]
+  titulo      String // RF20.1 [cite: 110]
+  autor       String // RF20.1 [cite: 110]
+  coAutores   String[] // RF20.2 "adicionar mais de um co-autor" [cite: 110]
+  edicao      String // RF20.1 [cite: 110]
+  anoEdicao   Int // RF20.1 [cite: 110]
+  idioma      String // RF20.1 [cite: 110]
+  publicacao  String // RF20.1 [cite: 110]
+  resumo      String? // RF20.1 [cite: 110]
+  imageUrl    String? // RF20.1 [cite: 110]
+  tipo        BookType // RF20.1 [cite: 110]
+
+  // Relacionamentos
+  copies      BookCopy[] // Os exemplares físicos/digitais desta obra
+  folders     Folder[]   @relation("BookFolders") // Pastas que contêm este livro
+  cartItems   CartItem[] // Usuários que têm este livro na cesta
+}
+
+/// Modelo para o Exemplar (Cópia física)
+/// Baseado nos requisitos RF22 e RF23
+model BookCopy {
+  id            String        @id @default(cuid())
+  bookId        String
+  book          Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  
+  copyNumber    Int // "número" do exemplar (RF22.1) [cite: 112]
+  status        CopyStatus    @default(DISPONIVEL) // RF22.1 [cite: 112]
+  condition     BookCondition @default(BOA) // RF23.3 
+  
+  // Relacionamentos
+  loans         Loan[] // Histórico de empréstimos deste exemplar
+  reservation   Reservation? // A reserva *ativa* deste exemplar (1-para-1)
+  
+  @@unique([bookId, copyNumber]) // Garante que o número do exemplar é único por livro
+}
+
+/// Modelo para Empréstimos (Aluguel)
+/// Baseado nos requisitos RF08 e RF23.5
+model Loan {
+  id              String     @id @default(cuid())
+  userMatricula   String
+  user            User       @relation(fields: [userMatricula], references: [matricula])
+  
+  bookCopyId      String
+  bookCopy        BookCopy   @relation(fields: [bookCopyId], references: [id])
+  
+  dataEmprestimo  DateTime   @default(now()) // RF23.5 
+  dataLimite      DateTime // RF23.5 
+  dataDevolucao   DateTime? // Implícito por RF08.1 "devolvidos" 
+  status          LoanStatus @default(ATIVO) // RF08.1 
+  renovacoes      Int        @default(0) // RF23.5 
+  divida          Float      @default(0.0) // RF23.5 
+}
+
+/// Modelo para Reservas
+/// Baseado nos requisitos RF08 e RF23.10
+model Reservation {
+  id              String            @id @default(cuid())
+  userMatricula   String
+  user            User              @relation(fields: [userMatricula], references: [matricula])
+  
+  bookCopyId      String            @unique // Um exemplar só pode ter uma reserva ativa (RF23.10) 
+  bookCopy        BookCopy          @relation(fields: [bookCopyId], references: [id])
+  
+  dataReserva     DateTime          @default(now()) // RF23.10 
+  dataLimite      DateTime // RF23.10 
+  status          ReservationStatus @default(ATIVA)
+}
+
+/// Modelo para Pastas de Livros (RF09, RF10)
+model Folder {
+  id        String       @id @default(cuid())
+  nome      String // RF09.3 
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt // RF10 "data última modificação" 
+  
+  // Relacionamentos
+  users     FolderUser[] // Usuários membros desta pasta
+  books     Book[]       @relation("BookFolders") // Livros nesta pasta (Muitos-para-Muitos)
+}
+
+/// Tabela de Junção para Pastas <-> Usuários com Permissões
+/// Baseado no requisito RF10.5, RF10.6
+model FolderUser {
+  folderId      String
+  folder        Folder     @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  userMatricula String
+  user          User       @relation(fields: [userMatricula], references: [matricula], onDelete: Cascade)
+  role          FolderRole @default(LEITOR) // RF10.6 
+
+  @@id([folderId, userMatricula]) // Chave primária composta
+}
+
+/// Modelo para Itens na Cesta (RF06, RF07.3)
+/// Tabela de Junção (Muitos-para-Muitos) entre User e Book
+model CartItem {
+  userMatricula String
+  user          User     @relation(fields: [userMatricula], references: [matricula], onDelete: Cascade)
+  bookId        String
+  book          Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  addedAt       DateTime @default(now())
+  
+  @@id([userMatricula, bookId]) // Usuário só pode ter uma unidade de cada livro na cesta
+}
+
+/// Modelo para Mensagens do Chat (RF28)
+model ChatMessage {
+  id            String   @id @default(cuid())
+  userMatricula String // A qual "thread" de usuário essa msg pertence
+  user          User     @relation(fields: [userMatricula], references: [matricula], onDelete: Cascade, name: "ChatThread")
+  
+  senderRole    Role // Quem enviou? O USER ou um ADMIN? (Baseado em RF28.1) [cite: 106]
+  text          String // RF28.1 [cite: 106]
+  timestamp     DateTime @default(now()) // RF28.1 [cite: 106]
+}
