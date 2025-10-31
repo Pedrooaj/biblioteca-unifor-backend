@@ -1,10 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
+import { jwtConstants } from '../constants';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from 'src/public/public.decorator';
+import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
+import { ROLES_KEY } from '../decorators/roles.decorator';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private jwtService: JwtService, private reflector: Reflector) { }
@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
       context.getClass()
     ])
 
-    if(isPublic){
+    if (isPublic) {
       return true
     }
     const request = context.switchToHttp().getRequest();
@@ -31,6 +31,18 @@ export class AuthGuard implements CanActivate {
     } catch (error) {
       throw new UnauthorizedException("Realize o Login primeiro!");
     }
+
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass()
+    ])
+
+    if(requiredRoles && requiredRoles.length > 0){
+      const user = request.user;
+      if(!user || !requiredRoles.includes(user.role)){
+        throw new UnauthorizedException('Acesso negado: permissão insuficiente.')
+      }
+    }
     return true
   }
 
@@ -40,3 +52,6 @@ export class AuthGuard implements CanActivate {
     return type === 'Bearer' ? token : undefined;
   }
 }
+
+
+
