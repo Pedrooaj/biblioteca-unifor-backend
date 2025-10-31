@@ -1,20 +1,22 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login-dto';
 import { RegisterDto } from './dto/register-dto';
+import { AuthGuard } from './auth.guard';
+import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService){}
 
     @HttpCode(HttpStatus.OK)
-    @Post("/login")
+    @Post("login")
     login(@Body() loginDto: LoginDto){
         return this.authService.login(loginDto.matricula, loginDto.senha)
     }
 
     @HttpCode(HttpStatus.CREATED)
-    @Post("/register")
+    @Post("register")
     register(@Body() registerDto: RegisterDto){
         return this.authService.register(
             registerDto.nome, 
@@ -22,5 +24,11 @@ export class AuthController {
             registerDto.email, 
             registerDto.senha
         )
+    }
+
+    @Get("profile")
+    @UseGuards(AuthGuard)
+    async getProfile(@Req() req){
+        return req.user;
     }
 }   

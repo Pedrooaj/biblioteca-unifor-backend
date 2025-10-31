@@ -22,14 +22,13 @@ export class AuthService {
         const payload = {
             matricula: user.matricula,
             role: user.role,
-            nome: user.nome
+            nome: user.nome,
+            email: user.email,
+        
         }
 
-        const {senha:_, ...result} = user
-        return {
-            access_token: await this.jwtService.signAsync(payload),
-            ...result
-        };
+        const access_token = await this.jwtService.signAsync(payload)
+        return { access_token };
     }
 
     async register(nome: string, matricula: string, email: string, senha: string) {
@@ -49,11 +48,20 @@ export class AuthService {
         const payload = {
             matricula: newUser.matricula,
             role: newUser.role,
-            nome: newUser.nome
+            nome: newUser.nome,
+            email: newUser.email
         }
         const access_token = await this.jwtService.signAsync(payload);
 
-        const {senha: _, ...result } = newUser;
-        return { ...result, access_token }
+        return { access_token }
+    }
+
+    async profile(matricula: string){
+        const user = await this.usersService.findOne({ matricula });
+        if(!user) throw new UnauthorizedException("Usuário não encontrado");
+
+        const {senha: _, ...result} = user;
+        return result;
+
     }
 }
