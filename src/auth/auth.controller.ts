@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login-dto';
 import { RegisterDto } from './dto/register-dto';
 import { AuthGuard } from './auth.guard';
-import { Public } from 'src/public/SkipAuth';
+import { Public } from 'src/public/public.decorator';
 
 @Controller('auth')
 export class AuthController {
