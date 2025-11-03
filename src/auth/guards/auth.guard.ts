@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { Role } from 'generated/prisma/enums';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private jwtService: JwtService, private reflector: Reflector) { }
@@ -32,7 +33,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException("Realize o Login primeiro!");
     }
 
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass()
     ])

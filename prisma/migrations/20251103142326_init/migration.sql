@@ -1,13 +1,5 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `fotoUrl` on the `User` table. All the data in the column will be lost.
-  - You are about to drop the column `funcao` on the `User` table. All the data in the column will be lost.
-  - The `role` column on the `User` table would be dropped and recreated. This will lead to data loss if there is data in the column.
-
-*/
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
+CREATE TYPE "Role" AS ENUM ('ALUNO', 'ADMINISTRADOR');
 
 -- CreateEnum
 CREATE TYPE "BookType" AS ENUM ('FISICO', 'DIGITAL');
@@ -27,14 +19,18 @@ CREATE TYPE "ReservationStatus" AS ENUM ('ATIVA', 'CANCELADA', 'EXPIRADA', 'CONC
 -- CreateEnum
 CREATE TYPE "FolderRole" AS ENUM ('PROPRIETARIO', 'EDITOR', 'LEITOR');
 
--- AlterTable
-ALTER TABLE "User" DROP COLUMN "fotoUrl",
-DROP COLUMN "funcao",
-DROP COLUMN "role",
-ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'USER';
+-- CreateTable
+CREATE TABLE "User" (
+    "matricula" TEXT NOT NULL,
+    "nome" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "senha" TEXT NOT NULL,
+    "role" "Role" NOT NULL DEFAULT 'ALUNO',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- DropEnum
-DROP TYPE "public"."UserRole";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("matricula")
+);
 
 -- CreateTable
 CREATE TABLE "Book" (
@@ -138,6 +134,9 @@ CREATE TABLE "_BookFolders" (
 
     CONSTRAINT "_BookFolders_AB_pkey" PRIMARY KEY ("A","B")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Book_isbn_key" ON "Book"("isbn");

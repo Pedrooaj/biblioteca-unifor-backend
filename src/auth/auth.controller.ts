@@ -1,10 +1,10 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login-dto';
-import { RegisterDto } from './dto/register-dto';
-import { AuthGuard } from './guards/auth.guard';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { User, UserPayload } from './decorators/user.decorator';
 
 @ApiTags('Auth') // Agrupa os endpoints no Swagger sob "Auth"
 @Controller('auth')
@@ -61,7 +61,7 @@ export class AuthController {
     @ApiOperation({ summary: 'Retorna perfil do usuário autenticado' })
     @ApiResponse({ status: 200, description: 'Perfil do usuário retornado com sucesso' })
     @ApiResponse({ status: 401, description: 'Usuário não autenticado' })
-    async getProfile(@Req() req) {
-        return req.user;
+    async getProfile(@User() user: UserPayload) {
+        return user;
     }
 }

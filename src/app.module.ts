@@ -6,13 +6,20 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AdminController } from './admin/admin.controller';
 import { ConfigModule } from '@nestjs/config';
+import { FoldersModule } from './folders/folders.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/guards/auth.guard';
+
 
 @Module({
   imports: [AuthModule, UsersModule, ConfigModule.forRoot({
     isGlobal: true
-  })],
+  }), FoldersModule],
   controllers: [AppController, AdminController],
-  providers: [AppService, PrismaService],
+  providers: [AppService, PrismaService, {
+      provide: APP_GUARD,
+      useClass: AuthGuard
+    }],
   exports: [
     PrismaService
   ]

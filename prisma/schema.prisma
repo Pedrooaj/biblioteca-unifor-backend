@@ -19,8 +19,8 @@ datasource db {
 
 /// Enum para os papéis de usuário (RF1.5)
 enum Role {
-  USER
-  ADMIN
+  ALUNO
+  ADMINISTRADOR
 }
 
 /// Enum para os tipos de obra (RF07, RF20.1)
@@ -76,7 +76,7 @@ model User {
   nome              String // Baseado no protótipo (p. 19) e RF04.2 [cite: 100, 160]
   email             String       @unique // RF3.1 
   senha             String // "senha" de RF1 e RF3 
-  role              Role         @default(USER) // RF1.5 
+  role              Role         @default(ALUNO) // RF1.5 
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
   

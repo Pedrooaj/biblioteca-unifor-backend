@@ -2,7 +2,7 @@ import * as argon2 from "argon2";
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-import { RegisterDto } from "./dto/register-dto";
+import { RegisterDto } from "./dto/register.dto";
 
 @Injectable()
 export class AuthService {
@@ -43,7 +43,7 @@ export class AuthService {
             nome,
             email,
             senha: hashedPassword,
-            role: "USER"
+            role: "ALUNO"
         })
         const payload = {
             matricula: newUser.matricula,
