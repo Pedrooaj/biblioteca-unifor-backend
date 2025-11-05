@@ -105,6 +105,15 @@ export class CreateBookDto {
   @IsEnum(BookType)
   @IsNotEmpty()
   tipo: BookType;
+
+  @ApiProperty({
+    description: 'Número de exemplares a serem criados',
+    example: 5,
+    minimum: 0,
+  })
+  @IsInt()
+  @Min(0)
+  numeroExemplares: number;
 }
 
 export class UpdateBookDto {

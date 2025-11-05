@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from 'generated/prisma/client';
+import { CopyStatus, BookCondition } from 'generated/prisma/enums';
 import { PrismaService } from 'src/prisma.service';
 import { CreateBookDto } from './dto/book.dto';
 import { UpdateBookDto } from './dto/book.dto';
@@ -14,21 +15,52 @@ export class BooksService {
 
   async create(createBookDto: CreateBookDto) {
     try {
-      return await this.prisma.book.create({
-        data: {
-          isbn: createBookDto.isbn,
-          titulo: createBookDto.titulo,
-          autor: createBookDto.autor,
-          coAutores: createBookDto.coAutores || [],
-          edicao: createBookDto.edicao,
-          anoEdicao: createBookDto.anoEdicao,
-          idioma: createBookDto.idioma,
-          publicacao: createBookDto.publicacao,
-          resumo: createBookDto.resumo,
-          imageUrl: createBookDto.imageUrl,
-          tipo: createBookDto.tipo,
-        },
+      // Criar o livro e seus exemplares em uma transação
+      const book = await this.prisma.$transaction(async (tx) => {
+        // 1. Criar o livro
+        const createdBook = await tx.book.create({
+          data: {
+            isbn: createBookDto.isbn,
+            titulo: createBookDto.titulo,
+            autor: createBookDto.autor,
+            coAutores: createBookDto.coAutores || [],
+            edicao: createBookDto.edicao,
+            anoEdicao: createBookDto.anoEdicao,
+            idioma: createBookDto.idioma,
+            publicacao: createBookDto.publicacao,
+            resumo: createBookDto.resumo,
+            imageUrl: createBookDto.imageUrl,
+            tipo: createBookDto.tipo,
+          },
+        });
+
+        // 2. Criar os exemplares automaticamente
+        if (createBookDto.numeroExemplares > 0) {
+          const copies = Array.from(
+            { length: createBookDto.numeroExemplares },
+            (_, index) => ({
+              bookId: createdBook.id,
+              copyNumber: index + 1,
+              status: CopyStatus.DISPONIVEL,
+              condition: BookCondition.BOA,
+            }),
+          );
+
+          await tx.bookCopy.createMany({
+            data: copies,
+          });
+        }
+
+        // 3. Retornar o livro com os exemplares criados
+        return await tx.book.findUnique({
+          where: { id: createdBook.id },
+          include: {
+            copies: true,
+          },
+        });
       });
+
+      return book;
     } catch (e) {
       if (this.isPrismaError(e, 'P2002')) {
         throw new ConflictException(
