@@ -1,0 +1,433 @@
+### ============================================
+### Biblioteca Unifor API - Testes HTTP
+### ============================================
+### Base URL (ajuste conforme necessário)
+@baseUrl = http://localhost:3000
+
+### Variáveis de autenticação (preencha após fazer login)
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYXRyaWN1bGEiOiJBRE1JTjAwMSIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwibm9tZSI6IkFkbWluIFVzZXIiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYyMzYzMDM4LCJleHAiOjE3NjIzNzM4Mzh9.scd8DzskXG52QeGGK1QC37Go3i0xWVZh94q4D2kExF4
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYXRyaWN1bGEiOiJBRE1JTjAwMSIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwibm9tZSI6IkFkbWluIFVzZXIiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYyMzYzMTAyLCJleHAiOjE3NjIzNzM5MDJ9.X9OOTnAo8imk8QWGUOpounQ8qJu2M8WEdbJqgxefqCk
+@bookId = 
+@bookCopyId = 
+@folderId = 
+
+### ============================================
+### AUTH - Autenticação
+### ============================================
+
+### 1. Registrar novo usuário (ALUNO)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nome": "João Silva",
+  "matricula": "202300123",
+  "email": "joao.silva@example.com",
+  "senha": "senha123"
+}
+
+### 2. Registrar administrador
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nome": "Admin User",
+  "matricula": "ADMIN001",
+  "email": "admin@example.com",
+  "senha": "admin123"
+}
+
+### 3. Login como aluno
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "matricula": "202300123",
+  "senha": "senha123"
+}
+
+### 4. Login como admin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "matricula": "ADMIN001",
+  "senha": "admin123"
+}
+
+### 5. Obter perfil do usuário autenticado
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{token}}
+
+### ============================================
+### BOOKS - Livros
+### ============================================
+
+### 6. Criar livro físico com exemplares (requer ADMIN)
+# Cria automaticamente 5 exemplares numerados de 1 a 5
+POST {{baseUrl}}/books
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "isbn": "978-85-333-0227-3",
+  "titulo": "O Senhor dos Anéis",
+  "autor": "J.R.R. Tolkien",
+  "coAutores": ["Christopher Tolkien"],
+  "edicao": "1ª edição",
+  "anoEdicao": 2023,
+  "idioma": "Português",
+  "publicacao": "HarperCollins",
+  "resumo": "Uma aventura épica na Terra Média",
+  "imageUrl": "https://example.com/capa.jpg",
+  "tipo": "FISICO",
+  "numeroExemplares": 5
+}
+
+### 7. Criar livro digital com exemplares
+POST {{baseUrl}}/books
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "isbn": "978-85-333-0228-0",
+  "titulo": "Harry Potter e a Pedra Filosofal",
+  "autor": "J.K. Rowling",
+  "coAutores": [],
+  "edicao": "2ª edição",
+  "anoEdicao": 2024,
+  "idioma": "Português",
+  "publicacao": "Rocco",
+  "resumo": "As aventuras do jovem bruxo",
+  "tipo": "DIGITAL",
+  "numeroExemplares": 3
+}
+
+### 8. Criar livro sem exemplares
+POST {{baseUrl}}/books
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "isbn": "978-85-333-0229-1",
+  "titulo": "1984",
+  "autor": "George Orwell",
+  "coAutores": [],
+  "edicao": "1ª edição",
+  "anoEdicao": 2024,
+  "idioma": "Português",
+  "publicacao": "Companhia das Letras",
+  "resumo": "Um romance distópico sobre vigilância e controle",
+  "tipo": "FISICO",
+  "numeroExemplares": 0
+}
+
+### 9. Listar todos os livros (com paginação)
+GET {{baseUrl}}/books?page=1&limit=10
+Authorization: Bearer {{token}}
+
+### 10. Listar livros - página 2
+GET {{baseUrl}}/books?page=2&limit=5
+Authorization: Bearer {{token}}
+
+### 11. Buscar livro por ID
+GET {{baseUrl}}/books/{{bookId}}
+Authorization: Bearer {{token}}
+
+### 12. Atualizar livro (requer ADMIN)
+PATCH {{baseUrl}}/books/{{bookId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "titulo": "O Senhor dos Anéis - Edição Atualizada",
+  "resumo": "Uma aventura épica na Terra Média - Versão atualizada"
+}
+
+### 13. Deletar livro (requer ADMIN)
+DELETE {{baseUrl}}/books/{{bookId}}
+Authorization: Bearer {{adminToken}}
+
+### ============================================
+### BOOK COPIES - Exemplares
+### ============================================
+
+### 14. Criar exemplar manualmente (requer ADMIN)
+POST {{baseUrl}}/book-copies
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "bookId": "{{bookId}}",
+  "copyNumber": 6,
+  "status": "DISPONIVEL",
+  "condition": "BOA"
+}
+
+### 15. Criar exemplar sem especificar número (usa próximo disponível)
+POST {{baseUrl}}/book-copies
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "bookId": "{{bookId}}",
+  "status": "DISPONIVEL",
+  "condition": "BOA"
+}
+
+### 16. Listar todos os exemplares
+GET {{baseUrl}}/book-copies
+Authorization: Bearer {{token}}
+
+### 17. Listar exemplares de um livro específico
+GET {{baseUrl}}/book-copies/book/{{bookId}}
+Authorization: Bearer {{token}}
+
+### 18. Buscar exemplar por ID
+GET {{baseUrl}}/book-copies/{{bookCopyId}}
+Authorization: Bearer {{token}}
+
+### 19. Atualizar exemplar (requer ADMIN)
+PATCH {{baseUrl}}/book-copies/{{bookCopyId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "ALUGADO",
+  "condition": "CONSERVADO"
+}
+
+### 20. Atualizar apenas status do exemplar
+PATCH {{baseUrl}}/book-copies/{{bookCopyId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "INDISPONIVEL"
+}
+
+### 21. Atualizar apenas condição do exemplar
+PATCH {{baseUrl}}/book-copies/{{bookCopyId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "condition": "MUITO_BOA"
+}
+
+### 22. Deletar exemplar (requer ADMIN)
+DELETE {{baseUrl}}/book-copies/{{bookCopyId}}
+Authorization: Bearer {{adminToken}}
+
+### ============================================
+### FOLDERS - Pastas
+### ============================================
+
+### 23. Criar pasta
+POST {{baseUrl}}/folders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Meus Livros Favoritos"
+}
+
+### 24. Listar minhas pastas
+GET {{baseUrl}}/folders/my
+Authorization: Bearer {{token}}
+
+### 25. Obter pasta por ID
+GET {{baseUrl}}/folders/{{folderId}}
+Authorization: Bearer {{token}}
+
+### 26. Atualizar nome da pasta
+PATCH {{baseUrl}}/folders/{{folderId}}/name
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Favoritos Atualizado"
+}
+
+### 27. Adicionar livro à pasta
+POST {{baseUrl}}/folders/{{folderId}}/books
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "bookId": "{{bookId}}"
+}
+
+### 28. Remover livro da pasta
+DELETE {{baseUrl}}/folders/{{folderId}}/books/{{bookId}}
+Authorization: Bearer {{token}}
+
+### 29. Adicionar usuário à pasta
+POST {{baseUrl}}/folders/{{folderId}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "userMatricula": "202300456",
+  "role": "LEITOR"
+}
+
+### 30. Remover usuário da pasta
+DELETE {{baseUrl}}/folders/{{folderId}}/users/USER_MATRICULA_AQUI
+Authorization: Bearer {{token}}
+
+### 31. Deletar pasta
+DELETE {{baseUrl}}/folders/{{folderId}}
+Authorization: Bearer {{token}}
+
+### ============================================
+### ADMIN - Administração
+### ============================================
+
+### 32. Acessar rota admin (requer ADMIN)
+GET {{baseUrl}}/admin
+Authorization: Bearer {{adminToken}}
+
+### ============================================
+### TESTES DE ERRO E VALIDAÇÃO
+### ============================================
+
+### 33. Tentar criar livro sem autenticação (deve falhar - 401)
+POST {{baseUrl}}/books
+Content-Type: application/json
+
+{
+  "isbn": "978-85-333-9999-9",
+  "titulo": "Livro Teste",
+  "autor": "Autor Teste",
+  "edicao": "1ª",
+  "anoEdicao": 2024,
+  "idioma": "Português",
+  "publicacao": "Editora Teste",
+  "tipo": "FISICO",
+  "numeroExemplares": 1
+}
+
+### 34. Tentar criar livro como aluno (deve falhar - 403 - apenas admin)
+POST {{baseUrl}}/books
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isbn": "978-85-333-9999-9",
+  "titulo": "Livro Teste",
+  "autor": "Autor Teste",
+  "edicao": "1ª",
+  "anoEdicao": 2024,
+  "idioma": "Português",
+  "publicacao": "Editora Teste",
+  "tipo": "FISICO",
+  "numeroExemplares": 1
+}
+
+### 35. Tentar criar exemplar como aluno (deve falhar - 403 - apenas admin)
+POST {{baseUrl}}/book-copies
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "bookId": "{{bookId}}",
+  "status": "DISPONIVEL",
+  "condition": "BOA"
+}
+
+### 36. Tentar acessar admin como aluno (deve falhar - 401/403)
+GET {{baseUrl}}/admin
+Authorization: Bearer {{token}}
+
+### 37. Tentar criar livro com ISBN duplicado (deve falhar - 409)
+POST {{baseUrl}}/books
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "isbn": "978-85-333-0227-3",
+  "titulo": "Livro Duplicado",
+  "autor": "Autor Teste",
+  "edicao": "1ª",
+  "anoEdicao": 2024,
+  "idioma": "Português",
+  "publicacao": "Editora Teste",
+  "tipo": "FISICO",
+  "numeroExemplares": 1
+}
+
+### 38. Tentar buscar livro inexistente (deve falhar - 404)
+GET {{baseUrl}}/books/000000000000000000000000
+Authorization: Bearer {{token}}
+
+### 39. Tentar buscar exemplar inexistente (deve falhar - 404)
+GET {{baseUrl}}/book-copies/000000000000000000000000
+Authorization: Bearer {{token}}
+
+### 40. Tentar criar exemplar com livro inexistente (deve falhar - 404)
+POST {{baseUrl}}/book-copies
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "bookId": "000000000000000000000000",
+  "status": "DISPONIVEL",
+  "condition": "BOA"
+}
+
+### 41. Tentar criar livro com dados inválidos (deve falhar - 400)
+POST {{baseUrl}}/books
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "isbn": "",
+  "titulo": "",
+  "autor": "",
+  "edicao": "1ª",
+  "anoEdicao": -1,
+  "idioma": "Português",
+  "publicacao": "Editora Teste",
+  "tipo": "INVALIDO",
+  "numeroExemplares": -5
+}
+
+### ============================================
+### FLUXO COMPLETO DE TESTE
+### ============================================
+
+### 42. Fluxo completo: Criar livro → Ver exemplares → Atualizar exemplar
+### Passo 1: Criar livro com 3 exemplares
+POST {{baseUrl}}/books
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "isbn": "978-85-333-1000-0",
+  "titulo": "Dom Casmurro",
+  "autor": "Machado de Assis",
+  "coAutores": [],
+  "edicao": "1ª edição",
+  "anoEdicao": 2024,
+  "idioma": "Português",
+  "publicacao": "Globo Livros",
+  "resumo": "Um clássico da literatura brasileira",
+  "tipo": "FISICO",
+  "numeroExemplares": 3
+}
+
+### Passo 2: Listar exemplares do livro criado
+# Use o bookId retornado no passo anterior
+GET {{baseUrl}}/book-copies/book/{{bookId}}
+Authorization: Bearer {{token}}
+
+### Passo 3: Atualizar status do primeiro exemplar
+# Use o bookCopyId retornado no passo anterior
+PATCH {{baseUrl}}/book-copies/{{bookCopyId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "ALUGADO"
+}

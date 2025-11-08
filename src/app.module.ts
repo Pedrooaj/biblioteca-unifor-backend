@@ -7,14 +7,17 @@ import { UsersModule } from './users/users.module';
 import { AdminController } from './admin/admin.controller';
 import { ConfigModule } from '@nestjs/config';
 import { FoldersModule } from './folders/folders.module';
+import { BooksModule } from './books/books.module';
+import { BookCopiesModule } from './book-copies/book-copies.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { CartModule } from './cart/cart.module';
 
 
 @Module({
   imports: [AuthModule, UsersModule, ConfigModule.forRoot({
     isGlobal: true
-  }), FoldersModule],
+  }), FoldersModule, BooksModule, BookCopiesModule, CartModule],
   controllers: [AppController, AdminController],
   providers: [AppService, PrismaService, {
       provide: APP_GUARD,
