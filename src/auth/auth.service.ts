@@ -2,6 +2,7 @@ import * as argon2 from "argon2";
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
+import { MailService } from "src/mail/mail.service";
 
 
 const passwordResetCodes = new Map<string, string>();
@@ -10,7 +11,8 @@ const passwordResetCodes = new Map<string, string>();
 export class AuthService {
     constructor(
         private usersService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private mailService: MailService
     ) { }
 
     async login(matricula: string, password: string): Promise<{ access_token: string }> {
@@ -74,8 +76,7 @@ export class AuthService {
         const code = Math.floor(100000 + Math.random() * 900000).toString();
         passwordResetCodes.set(email, code);
 
-        console.log(`Código de recuperação para ${email}: ${code}`);
-
+        await this.mailService.sendPasswordRecovery(email, code);
         return { message: 'Código enviado para o e-mail' };
     }
 

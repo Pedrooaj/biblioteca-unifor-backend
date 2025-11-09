@@ -12,12 +12,13 @@ import { BookCopiesModule } from './book-copies/book-copies.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { CartModule } from './cart/cart.module';
+import { MailModule } from './mail/mail.module';
 
 
 @Module({
   imports: [AuthModule, UsersModule, ConfigModule.forRoot({
     isGlobal: true
-  }), FoldersModule, BooksModule, BookCopiesModule, CartModule],
+  }), FoldersModule, BooksModule, BookCopiesModule, CartModule, MailModule],
   controllers: [AppController, AdminController],
   providers: [AppService, PrismaService, {
       provide: APP_GUARD,
