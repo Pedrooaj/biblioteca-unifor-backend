@@ -7,7 +7,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 export class AdminController {
 
     @Get()
-    @Roles("ADMINISTRADOR")
+    @Roles()
     // mostra o cadeado no Swagger
     @ApiOperation({ summary: 'Rota exclusiva para admins', description: 'Somente usuários com role ADMIN podem acessar esta rota' })
     @ApiResponse({ status: 200, description: 'Rota acessada com sucesso' })

@@ -138,6 +138,7 @@ model ChatMessage {
 enum Role {
   ALUNO
   ADMINISTRADOR
+  SUPER
 }
 
 /// Enum para os tipos de obra (RF07, RF20.1)
