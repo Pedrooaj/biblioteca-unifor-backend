@@ -36,7 +36,15 @@ export class AuthService {
     }
 
     async register(nome: string, matricula: string, email: string, senha: string) {
-        const existingUser = await this.usersService.findOne({ matricula });
+        let existingUser = null;
+        try {
+            existingUser = await this.usersService.findOne({ matricula });
+        } catch (error) {
+            if(!(error instanceof NotFoundException)){
+                throw error;
+            }
+        }
+
         if (existingUser) throw new ConflictException("Email já cadastrado");
 
 

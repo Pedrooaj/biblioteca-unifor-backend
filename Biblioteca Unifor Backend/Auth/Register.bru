@@ -1,0 +1,25 @@
+meta {
+  name: Register
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/auth/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "nome": "Pedro Lemos", 
+    "matricula": "1234561", 
+    "email": "pedroantonio1359@gmail.com",
+    "senha": "1234561"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
