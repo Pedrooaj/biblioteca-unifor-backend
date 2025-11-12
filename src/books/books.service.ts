@@ -6,7 +6,7 @@ import {
 import { Prisma } from 'generated/prisma/client';
 import { CopyStatus, BookCondition } from 'generated/prisma/enums';
 import { PrismaService } from 'src/prisma.service';
-import { CreateBookDto } from './dto/book.dto';
+import { CreateBookDto, FilterBooksDto } from './dto/book.dto';
 import { UpdateBookDto } from './dto/book.dto';
 
 @Injectable()
@@ -71,12 +71,42 @@ export class BooksService {
     }
   }
 
-  async findAll(page: number = 1, limit: number = 10) {
+  async findAll(page: number = 1, limit: number = 10, filters?: FilterBooksDto) {
     const skip = (page - 1) * limit;
     const take = limit;
 
+    // Construir o objeto where do Prisma baseado nos filtros
+    const where: Prisma.BookWhereInput = {};
+
+    if (filters?.search) {
+      // Busca geral em múltiplos campos
+      where.OR = [
+        { titulo: { contains: filters.search, mode: 'insensitive' } },
+        { autor: { contains: filters.search, mode: 'insensitive' } },
+        { isbn: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    } else {
+      // Filtros específicos
+      if (filters?.titulo) {
+        where.titulo = { contains: filters.titulo, mode: 'insensitive' };
+      }
+      if (filters?.autor) {
+        where.autor = { contains: filters.autor, mode: 'insensitive' };
+      }
+      if (filters?.isbn) {
+        where.isbn = { contains: filters.isbn, mode: 'insensitive' };
+      }
+      if (filters?.anoEdicao) {
+        where.anoEdicao = filters.anoEdicao;
+      }
+      if (filters?.edicao) {
+        where.edicao = { contains: filters.edicao, mode: 'insensitive' };
+      }
+    }
+
     const [books, total] = await Promise.all([
       this.prisma.book.findMany({
+        where,
         skip,
         take,
         include: {
@@ -86,7 +116,7 @@ export class BooksService {
           titulo: 'asc',
         },
       }),
-      this.prisma.book.count(),
+      this.prisma.book.count({ where }),
     ]);
 
     return {

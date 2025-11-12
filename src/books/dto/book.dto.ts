@@ -221,3 +221,59 @@ export class UpdateBookDto {
   tipo?: BookType;
 }
 
+export class FilterBooksDto {
+  @ApiProperty({
+    description: 'Filtro por título (busca parcial, case-insensitive)',
+    example: 'Senhor dos Anéis',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  titulo?: string;
+
+  @ApiProperty({
+    description: 'Filtro por autor (busca parcial, case-insensitive)',
+    example: 'Tolkien',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  autor?: string;
+
+  @ApiProperty({
+    description: 'Filtro por ISBN (busca parcial)',
+    example: '978-85',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  isbn?: string;
+
+  @ApiProperty({
+    description: 'Filtro por ano de edição exato',
+    example: 2023,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  anoEdicao?: number;
+
+  @ApiProperty({
+    description: 'Filtro por edição (busca parcial, case-insensitive)',
+    example: '1ª edição',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  edicao?: string;
+
+  @ApiProperty({
+    description: 'Busca geral em múltiplos campos (título, autor, ISBN)',
+    example: 'Tolkien',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  search?: string;
+}
+
