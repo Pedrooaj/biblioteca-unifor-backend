@@ -14,8 +14,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           transport: {
         host: "smtp.gmail.com", 
         port: 587,
-        secure: false,
-        family: 4,
+        secure: true,
+            
         auth: {
           user: process.env.MAIL_USER,
           pass: process.env.MAIL_PASS
