@@ -12,9 +12,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
           transport: {
-        host: "smtp.gmail.com", 
-        port: 587,
-        secure: true,
+        host: "smtp-relay.brevo.com", 
+        port: 2525,
+        secure: false,
             
         auth: {
           user: process.env.MAIL_USER,
