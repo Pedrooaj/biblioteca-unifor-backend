@@ -8,7 +8,7 @@ import { seedSuperUser } from './seed/superuser.seed';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  await seedSuperUser(app);
+  // await seedSuperUser(app);
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,

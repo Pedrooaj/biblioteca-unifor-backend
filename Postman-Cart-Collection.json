@@ -1,0 +1,311 @@
+{
+  "info": {
+    "name": "Biblioteca Unifor - Cart & Loans",
+    "description": "Collection de testes para cesta de compras, empréstimos, reservas e devoluções",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matricula\": \"2023101234\",\n  \"senha\": \"senhaSegura123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matricula\": \"2023101234\",\n  \"nome\": \"João Silva\",\n  \"email\": \"joao.silva@unifor.br\",\n  \"senha\": \"senhaSegura123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["auth", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart - Cesta",
+      "item": [
+        {
+          "name": "Adicionar Livro à Cesta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/cart/add/{{BOOK_COPY_ID}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart", "add", "{{BOOK_COPY_ID}}"]
+            },
+            "description": "Adiciona um exemplar à cesta do usuário. Usa o ID do exemplar (BookCopy)."
+          }
+        },
+        {
+          "name": "Listar Cesta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/cart",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart"]
+            },
+            "description": "Lista todos os itens na cesta do usuário autenticado."
+          }
+        },
+        {
+          "name": "Remover Livro da Cesta",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/cart/{{BOOK_ID}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart", "{{BOOK_ID}}"]
+            },
+            "description": "Remove um livro da cesta usando o ID do livro (Book)."
+          }
+        },
+        {
+          "name": "Limpar Cesta",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/cart",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart"]
+            },
+            "description": "Remove todos os itens da cesta do usuário."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Checkout - Empréstimo",
+      "item": [
+        {
+          "name": "Fazer Checkout (Converter Cesta em Empréstimo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataLimite\": \"2025-12-15T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/cart/checkout",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart", "checkout"]
+            },
+            "description": "Converte os itens da cesta em empréstimos. Valida disponibilidade e cria os Loans."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reserva - Livros Indisponíveis",
+      "item": [
+        {
+          "name": "Reservar Livro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataLimite\": \"2025-12-15T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/cart/reserve/{{BOOK_ID}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart", "reserve", "{{BOOK_ID}}"]
+            },
+            "description": "Cria uma reserva para um livro quando TODOS os exemplares estão emprestados. O sistema valida automaticamente se há exemplares disponíveis antes de permitir a reserva."
+          }
+        },
+        {
+          "name": "Listar Minhas Reservas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/cart/reservations",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart", "reservations"]
+            },
+            "description": "Lista todas as reservas ativas do usuário autenticado."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Devolução - Retorno de Livros",
+      "item": [
+        {
+          "name": "Devolver Livro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/cart/return/{{LOAN_ID}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart", "return", "{{LOAN_ID}}"]
+            },
+            "description": "Marca um empréstimo como devolvido. Se há reservas ativas, o exemplar fica RESERVADO; caso contrário, volta ao pool de DISPONIVEL."
+          }
+        },
+        {
+          "name": "Listar Meus Empréstimos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/cart/loans",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["cart", "loans"]
+            },
+            "description": "Lista todos os empréstimos do usuário (ativos e devolvidos), com informações de atraso se aplicável."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "BOOK_COPY_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "BOOK_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "LOAN_ID",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
